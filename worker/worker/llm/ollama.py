@@ -37,8 +37,8 @@ class Ollama(Llm):
     out = self.extract_json(data.get("response", ""))
     out["_ollama"] = {
       at_model: model,
-      "prompt_tokens": data.get("prompt_eval_count"),
-      "eval_tokens": data.get("eval_count"),
-      "total_duration": data.get("total_duration"),
+      at_prompt_tokens: data.get(at_prompt_eval_count),
+      at_eval_tokens: data.get(at_eval_count),
+      at_total_duration: data.get(at_total_duration),
     }
     return out

@@ -17,13 +17,13 @@ if TYPE_CHECKING:
 class MessageBroker:
   def __init__(self, app: Application):
     self._app_ref = weakref.ref(app)
-    redis_url = getConfig(at_redis_url)
+    redis_url = getConfig(at_redis, at_url)
     self.redis = Redis.from_url(redis_url, decode_responses=True)
-    self.stream_key = getConfig(at_stream, at_key)
-    self.stream_group = getConfig(at_stream, at_group)
-    self.stream_consumer = getConfig(at_stream, at_consumer)
-    self.batch_size = getConfig(at_batch_size)
-    self.block_ms = getConfig(at_block_ms)
+    self.stream_key = getConfig(at_redis, at_stream, at_key)
+    self.stream_group = getConfig(at_redis, at_stream, at_group)
+    self.stream_consumer = getConfig(at_redis, at_stream, at_consumer)
+    self.batch_size = getConfig(at_redis, at_batch_size)
+    self.block_ms = getConfig(at_redis, at_block_ms)
 
   async def ensure_group(self) -> None:
     try:

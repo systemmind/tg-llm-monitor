@@ -5,16 +5,18 @@ from worker.strings import *
 
 
 settings = {
-  at_redis_url: os.environ.get(at_REDIS_URL) or 'redis://redis:6379/0',
-  at_pg_dsn: os.environ.get(at_PG_DSN) or '',
-  at_stream: {
-    at_key: 'tg:messages',
-    at_group: 'tg-classifiers',
-    at_consumer: 'worker-1',
+  at_redis: {
+    at_url: os.environ.get(at_REDIS_URL) or 'redis://redis:6379/0',
+    at_stream: {
+      at_key: 'tg:messages',
+      at_group: 'tg-classifiers',
+      at_consumer: 'worker-1',
+    },
+    at_batch_size: 8,
+    at_block_ms: 5000,
+    at_claim_idle_ms: 60000,
   },
-  at_batch_size: 8,
-  at_block_ms: 5000,
-  at_claim_idle_ms: 60000,
+  at_pg_dsn: os.environ.get(at_PG_DSN) or '',
   at_llm: {
     at_url: os.environ.get(at_OLLAMA_HOST) or 'http://ollama:11434',
     at_model: os.environ.get(at_LLM_MODEL) or 'llama3.2',

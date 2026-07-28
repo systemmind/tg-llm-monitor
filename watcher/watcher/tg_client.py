@@ -1,25 +1,35 @@
 from __future__ import annotations
 
 import time
+import weakref
+from typing import TYPE_CHECKING
 
 from telethon import TelegramClient, events
 from telethon.sessions import SQLiteSession
-from redis.asyncio import Redis
 
 from watcher.filters import build_filters, any_match
-from watcher.redis_out import push_message
+from watcher.settings import getSettings, getConfig
 from watcher.logger import logger
 from watcher.strings import *
 
+if TYPE_CHECKING:
+  from watcher.app import Application
+
 
 class TgClient:
-  def __init__(self, session_path: str, api_id: int, api_hash: str, redis: Redis, stream_key: str, filters, matched_only: bool):
-    self.client = TelegramClient(SQLiteSession(session_path), api_id, api_hash)
-    self.redis = redis
-    self.stream_key = stream_key
-    self.filters = filters
-    self.matched_only = matched_only
+  def __init__(self, app: Application):
+    self._app_ref = weakref.ref(app)
 
+    session_dir = getSettings(at_session_dir)
+    session_path = f"{session_dir}/telegram"
+    api_id = getSettings(at_telegram, at_id)
+    api_hash = getSettings(at_telegram, at_hash)
+
+    cfg = getConfig()
+    self.filters = build_filters(cfg)
+    self.matched_only = bool((cfg.get(at_routing) or {}).get(at_matched_only, True))
+
+    self.client = TelegramClient(SQLiteSession(session_path), api_id, api_hash)
     self.client.add_event_handler(self.handler, events.NewMessage)
 
   async def handler(self, event: events.NewMessage.Event):
@@ -54,7 +64,10 @@ class TgClient:
         at_chat_username: chat_username,
       }
 
-      await push_message(self.redis, self.stream_key, payload)
+      app = self._app_ref()
+      if app:
+        await app.handleMessage(payload)
+
     finally:
       logger.info(f"message: \"{text[:100]}\" from chat \"{chat_title}\", user: {chat_username}")
 

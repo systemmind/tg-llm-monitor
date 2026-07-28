@@ -2,11 +2,9 @@ from __future__ import annotations
 
 import asyncio
 
-import asyncpg
-
 from worker.llm.ollama import Ollama
 from worker.llm.openai import OpenAi
-from worker.db import init_db, insert_result
+from worker.db import Database
 from worker.message_broker import MessageBroker
 from worker.settings import getConfig
 from worker.utils import cancel_tasks
@@ -20,7 +18,7 @@ class Application:
     self.tasks = set()
     self.exitCode = 0
     self._stop = asyncio.Event()
-    self.pool = None
+    self.db = None
     self.broker = None
 
   def createTask(self, coro):
@@ -51,8 +49,8 @@ class Application:
     if self.broker:
       await self.broker.close()
 
-    if self.pool:
-      await self.pool.close()
+    if self.db:
+      await self.db.close()
 
     await self.llm.close()
 
@@ -62,15 +60,14 @@ class Application:
 
     if llm_result.get('score') and llm_result['score'] > 0.0:
       saved = True
-      await insert_result(self.pool, payload=payload, stream_id=stream_id, llm=llm_result)
+      await self.db.insert_result(payload=payload, stream_id=stream_id, llm=llm_result)
 
     llm_result['_saved'] = saved
     return llm_result
 
   async def _run(self):
     pg_dsn = getConfig(at_pg_dsn)
-    self.pool = await asyncpg.create_pool(pg_dsn, min_size=1, max_size=10)
-    await init_db(self.pool)
+    self.db = await Database.create(pg_dsn)
 
     await self.llm.init()
 
