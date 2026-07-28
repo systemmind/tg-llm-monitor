@@ -1,0 +1,20 @@
+{
+  "redis": {
+    "url": "redis://redis:6379/0",
+    "stream": {
+      "key": "tg:messages",
+      "group": "tg-classifiers",
+      "consumer": "worker-1"
+    },
+    "batch_size": 8,
+    "block_ms": 5000,
+    "claim_idle_ms": 60000
+  },
+  "pg_dsn": "******postgres:5432/tgmon",
+  "llm": {
+    "url": "http://ollama:11434",
+    "model": "llama3.2",
+    "prompt": "/config/prompt.txt",
+    "local": true
+  }
+}

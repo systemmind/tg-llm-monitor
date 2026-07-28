@@ -1,10 +1,10 @@
-FROM python:3.12-slim
+from python:3.12-slim
 
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+workdir /app
 
-COPY app ./app
-ENV PYTHONUNBUFFERED=1
+copy . .
 
-CMD ["python", "-m", "app.main"]
+run pip install -e . \
+  && mkdir -p /var/log/watcher
+
+entrypoint ["run", "--settings", "watcher/settings/settings.json"]

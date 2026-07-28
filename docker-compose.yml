@@ -8,10 +8,6 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    environment:
-      POSTGRES_USER: tg
-      POSTGRES_PASSWORD: tgpass
-      POSTGRES_DB: tgmon
     ports: ["5432:5432"]
     volumes:
       - ./postgres:/var/lib/postgresql/data
@@ -20,14 +16,9 @@ services:
     build: ./watcher
     depends_on: [redis]
     env_file: .env
-    environment:
-      REDIS_URL: redis://redis:6379/0
-      SESSION_DIR: /data/session
-      CONFIG_PATH: /config/config.yml
-      STREAM_KEY: tg:messages
     volumes:
       - watcher_session:/data/session
-      - ./watcher/config.test.yml:/config/config.yml:ro
+      - ./watcher/watcher/settings/config.yml:/config/config.yml:ro
     restart: unless-stopped
 
   ollama:
@@ -37,38 +28,37 @@ services:
     ports: ["11434:11434"]
     volumes:
       - ./ollama:/root/.ollama
-      # - ./ollama-import:/import:ro
-    gpus: all
+    # gpus: all   # uncomment this line to launch LLM on GPU
     restart: unless-stopped
 
-  worker:
+  # This service uses local ollama model
+  worker-ollama:
     profiles: ["llm"]
     build: ./worker
     depends_on: [redis, postgres, ollama]
     env_file: .env
     environment:
-      REDIS_URL: redis://redis:6379/0
-      PG_DSN: postgresql://tg:tgpass@postgres:5432/tgmon
-      STREAM_KEY: tg:messages
-      STREAM_GROUP: tg-classifiers
-      STREAM_CONSUMER: worker-1
-
-      # Ollama на хосте
-      #OLLAMA_URL: http://host.docker.internal:11434
-      # Worker ходит в ollama по имени сервиса в compose-сети
-      OLLAMA_URL: http://ollama:11434
-      # модель можно менять
-      OLLAMA_MODEL: llama3.2
-
-      BATCH_SIZE: "8"
-      BLOCK_MS: "5000"
-      CLAIM_IDLE_MS: "60000"
-
-      PROMPT_PATH: /config/prompt.txt
+      OLLAMA_HOST: http://ollama:11434
+      LLM_MODEL: llama3.2
+    command:
+      - --verbose
+      - --ollama
     volumes:
       - ./worker/prompt.txt:/config/prompt.txt:ro
-    # extra_hosts:
-    #   - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
+  # This service uses cloud LLM API (OpenAI-compatible)
+  worker-cloud:
+    profiles: ["cloud"]
+    build: ./worker
+    depends_on: [redis, postgres]
+    env_file: .env
+    environment:
+      LLM_MODEL: gpt-4o-mini
+    command:
+      - --verbose
+    volumes:
+      - ./worker/prompt.txt:/config/prompt.txt:ro
     restart: unless-stopped
 
 volumes:
