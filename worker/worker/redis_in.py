@@ -1,15 +1,16 @@
 from __future__ import annotations
 
 import json
-from typing import Any, Iterable, List, Tuple
+from typing import Any, Iterable
 
 from redis.asyncio import Redis
 from redis.exceptions import ResponseError
 
+from worker.logger import logger
+
 
 async def ensure_group(r: Redis, stream_key: str, group: str) -> None:
   try:
-    # mkstream=True создаст stream, если его ещё нет
     await r.xgroup_create(stream_key, group, id="0-0", mkstream=True)
   except ResponseError as e:
     if "BUSYGROUP" in str(e):
@@ -49,7 +50,6 @@ async def read_batch(
   )
   if not resp:
     return []
-  # resp: [(stream_key, [(id, {k:v}), ...])]
   _, items = resp[0]
   return _decode_messages(items)
 

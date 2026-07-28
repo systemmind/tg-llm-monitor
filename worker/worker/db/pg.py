@@ -2,51 +2,26 @@ from __future__ import annotations
 
 import json
 from datetime import datetime
-from typing import Any, Optional
+from typing import Optional
 
 import asyncpg
+from importlib import resources
+
+from worker.logger import logger
 
 
 async def init_db(pool: asyncpg.Pool) -> None:
+  with resources.as_file(resources.files('worker') / 'db' / 'schema.sql') as schema_file:
+    schema = schema_file.read_text(encoding='utf-8')
+
   async with pool.acquire() as conn:
-    # Встроенная схема (чтобы не возиться с отдельным применением миграций на старте)
-    await conn.execute(
-      """
-      CREATE TABLE IF NOT EXISTS tg_message_classifications (
-        id BIGSERIAL PRIMARY KEY,
-        chat_id BIGINT NOT NULL,
-        message_id BIGINT NOT NULL,
-        msg_date TIMESTAMPTZ NULL,
-        sender_id BIGINT NULL,
-        chat_title TEXT NULL,
-        chat_username TEXT NULL,
-
-        matched_by_keywords BOOLEAN NOT NULL DEFAULT FALSE,
-        matched_filters TEXT[] NOT NULL DEFAULT '{}',
-
-        text TEXT NOT NULL,
-
-        llm_match BOOLEAN NOT NULL,
-        llm_score REAL NULL,
-        llm_reason TEXT NULL,
-        llm_raw JSONB NULL,
-
-        stream_id TEXT NOT NULL,
-        created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-
-        UNIQUE(chat_id, message_id)
-      );
-
-      CREATE INDEX IF NOT EXISTS idx_tgmc_created_at ON tg_message_classifications(created_at DESC);
-      CREATE INDEX IF NOT EXISTS idx_tgmc_llm_match ON tg_message_classifications(llm_match);
-      """
-    )
+    await conn.execute(schema)
+  logger.info("database schema initialized")
 
 
 def _parse_dt(s: Optional[str]) -> Optional[datetime]:
   if not s:
     return None
-  # watcher пишет ISO8601
   try:
     return datetime.fromisoformat(s.replace("Z", "+00:00"))
   except Exception:
@@ -93,6 +68,6 @@ async def insert_result(pool, *, payload, stream_id: str, llm: dict) -> None:
       bool(llm.get("match", False)),
       llm.get("score"),
       llm.get("reason"),
-      llm_raw_json,  # <-- строка JSON
+      llm_raw_json,
       stream_id,
-  )
+    )

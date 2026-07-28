@@ -1,10 +1,10 @@
-FROM python:3.12-slim
+from python:3.12-slim
 
-WORKDIR /app
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+workdir /app
 
-COPY app ./app
+copy . .
 
-ENV PYTHONUNBUFFERED=1
-CMD ["python", "-m", "app.main"]
+run pip install -e . \
+  && mkdir -p /var/log/worker
+
+entrypoint ["run", "--settings", "worker/settings/settings.json"]
