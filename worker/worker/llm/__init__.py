@@ -4,6 +4,8 @@ import json
 import re
 from typing import Any, Dict
 
+import httpx
+
 from worker.settings import getConfig
 from worker.logger import logger
 from worker.strings import *
@@ -13,6 +15,24 @@ _JSON_RE = re.compile(r"\{.*\}", re.S)
 
 
 class Llm:
+  def __init__(self):
+    self._http = None
+
+  async def init(self):
+    self._http = httpx.AsyncClient()
+
+  async def close(self):
+    if self._http:
+      await self._http.aclose()
+
+  async def handle(self, payload: dict) -> Dict[str, Any]:
+    text = payload.get("text") or ""
+    result = await self.classify(self._http, text)
+    return result
+
+  async def classify(self, client: httpx.AsyncClient, text: str) -> Dict[str, Any]:
+    raise NotImplementedError
+
   def build_prompt(self, text: str) -> str:
     prompt = self.load_prompt()
     return f"{prompt}\n\nMessage:\n{text}"

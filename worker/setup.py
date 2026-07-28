@@ -4,7 +4,7 @@ setup(
   name='tg-llm-worker',
   version='1.0.0',
   description='Telegram LLM monitor worker',
-  author='Illia Rohozhkin',
+  author='systemmind',
   author_email='systemmind@ukr.net',
   url='https://github.com/systemmind/tg-llm-monitor',
   install_requires=[

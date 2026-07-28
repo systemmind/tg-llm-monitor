@@ -1,1 +1,6 @@
-{"redis_url":"redis://redis:6379/0","stream_key":"tg:messages","session_dir":"/data/session","config_path":"/config/config.yml"}
+{
+  "redis_url": "redis://redis:6379/0",
+  "stream_key": "tg:messages",
+  "session_dir": "/data/session",
+  "config_path": "/etc/tg-monitor/config.yml"
+}

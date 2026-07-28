@@ -22,8 +22,8 @@ class Ollama(Llm):
       f"{url}/api/generate",
       json={
         at_model: model,
-        "prompt": prompt,
-        "stream": False,
+        at_prompt: prompt,
+        at_stream: False,
         at_options: {
           at_temperature: 0,
         },
