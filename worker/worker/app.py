@@ -58,6 +58,8 @@ class Application:
     llm_result = await self.llm.handle(payload)
     saved = False
 
+    # FIXME: check that llm returns expected dictionary here
+    # FIXME: replace 'score' and '_saved' strings by at_score and at__saved constants and define them in the strings.py file
     if llm_result.get('score') and llm_result['score'] > 0.0:
       saved = True
       await self.db.insert_result(payload=payload, stream_id=stream_id, llm=llm_result)

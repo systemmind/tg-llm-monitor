@@ -20,7 +20,7 @@ settings = {
   at_llm: {
     at_url: os.environ.get(at_OLLAMA_HOST) or 'http://ollama:11434',
     at_model: os.environ.get(at_LLM_MODEL) or 'llama3.2',
-    at_prompt: '/config/prompt.txt',
+    at_prompt: '/etc/tg-monitor/prompt.txt',
     at_local: True,
   },
 }
