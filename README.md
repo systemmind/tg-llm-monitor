@@ -8,7 +8,7 @@ A service that monitors Telegram channels/chats, filters messages by keywords, a
 - **worker** — reads messages from Redis Stream, classifies them using LLM, and saves results to PostgreSQL
 
 ## Running Ollama on the local host
-This step is not required my it may be usefull for debugging.
+This step is not required but it may be usefull for any debugging.
 
 Execute the next command in the shell:
 ```bash
@@ -28,7 +28,7 @@ ollama serve
 curl http://127.0.0.1:11434/api/tags
 ```
 
-Check availability from Docker:
+Check availability from the Docker:
 ```bash
 docker compose run --rm worker-ollama python -c "import httpx; print(httpx.get('http://ollama:11434/api/tags').status_code)"
 ```
@@ -53,20 +53,20 @@ docker compose run --rm watcher
 docker compose down
 ```
 
-To launch the watcher service modify the `watcher.config.yml` file (or use it or the `watcher/watcher/settings/config.yml` file as examples) and laucnh the docker:
+To launch the watcher service modify the [watcher.config.yml](watcher.config.yml) file (or use it or the [watcher/watcher/settings/config.yml](watcher/watcher/settings/config.yml) file as examples) and laucnh the docker:
 ```bash
 # modify the watcher.config.yml
 docker compose up -d redis postgres watcher
 ```
 
-Launch worker with either local ollama:
+Launch worker with either a local ollama:
 ```bash
 docker compose --profile llm up -d worker-ollama
 # check ollama on host
 curl http://127.0.0.1:11434/api/tags
 ```
 
-or cloud LLM:
+or a cloud LLM:
 ```bash
 docker compose --profile cloud up -d worker-cloud
 ```
@@ -76,7 +76,7 @@ Stop:
 docker compose --profile llm stop worker-ollama
 ```
 
-If you made changes and need to rebuild and restart without stopping then execute the next commands.
+If you made changes and need to rebuild and restart without service stopping then execute the next commands.
 
 For worker:
 ```bash
