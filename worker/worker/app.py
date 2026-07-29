@@ -58,13 +58,15 @@ class Application:
     llm_result = await self.llm.handle(payload)
     saved = False
 
-    # FIXME: check that llm returns expected dictionary here
-    # FIXME: replace 'score' and '_saved' strings by at_score and at__saved constants and define them in the strings.py file
-    if llm_result.get('score') and llm_result['score'] > 0.0:
+    if not isinstance(llm_result, dict) or at_score not in llm_result:
+      logger.warning("LLM returned unexpected result format")
+      return {at_score: 0.0, at__saved: False}
+
+    if llm_result.get(at_score) and llm_result[at_score] > 0.0:
       saved = True
       await self.db.insert_result(payload=payload, stream_id=stream_id, llm=llm_result)
 
-    llm_result['_saved'] = saved
+    llm_result[at__saved] = saved
     return llm_result
 
   async def _run(self):

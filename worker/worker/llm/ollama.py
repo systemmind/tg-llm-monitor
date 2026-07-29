@@ -32,9 +32,9 @@ class Ollama(Llm):
       options={'temperature': 0},
     )
 
-    # FIXME: validate and return correct answer here
+    result = JobPosting.model_validate_json(response.message.content)
+    return result.model_dump()
 
 
-  def close(self):
-    # FIXME: close the client here
+  async def close(self):
     pass

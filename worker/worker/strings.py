@@ -24,6 +24,9 @@ at_total_duration = 'total_duration'
 at_url = 'url'
 at_user = 'user'
 
+at_score = 'score'
+at__saved = '_saved'
+
 at_OLLAMA_HOST = 'OLLAMA_HOST'
 at_LLM_MODEL = 'LLM_MODEL'
 at_REDIS_URL = 'REDIS_URL'

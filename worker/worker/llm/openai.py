@@ -24,9 +24,9 @@ class OpenAi(Llm):
       response_format=JobPosting
     )
 
-    # FIXME: return the correct response
+    result = resp.choices[0].message.parsed
+    return result.model_dump()
 
 
-  def close(self):
-    # FIXME: close client here
-    pass
+  async def close(self):
+    self.client.close()

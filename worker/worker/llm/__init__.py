@@ -11,8 +11,9 @@ from worker.strings import *
 
 
 class JobPosting(BaseModel):
-  # FIXME: implement this class
-  pass
+  match: bool = Field(description="Whether the message matches the job seeker category")
+  score: float = Field(description="Confidence score between 0 and 1")
+  reason: str = Field(description="Short reason in Russian")
 
 
 class Llm:
