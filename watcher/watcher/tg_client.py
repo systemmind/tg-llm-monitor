@@ -69,7 +69,7 @@ class TgClient:
         await app.handleMessage(payload)
 
     finally:
-      logger.info(f"message: \"{text[:100]}\" from chat \"{chat_title}\", user: {chat_username}")
+      logger.info(f"message: \"{text[:100]}\" from user: {chat_username} in the chat \"{chat_title}\"")
 
   async def start(self):
     await self.client.start()

@@ -7,7 +7,9 @@ from typing import Optional
 import asyncpg
 from importlib import resources
 
+from worker.settings import getConfig
 from worker.logger import logger
+from worker.strings import *
 
 
 class Database:
@@ -15,7 +17,9 @@ class Database:
     self.pool = pool
 
   @staticmethod
-  async def create(pg_dsn: str) -> Database:
+  async def create() -> Database:
+    pg_dsn = getConfig(at_pg_dsn)
+    logger.debug(f"create database, pg_dsn: {pg_dsn}")
     pool = await asyncpg.create_pool(pg_dsn, min_size=1, max_size=10)
     db = Database(pool)
     await db.init()
@@ -27,6 +31,7 @@ class Database:
 
     async with self.pool.acquire() as conn:
       await conn.execute(schema)
+
     logger.info("database schema initialized")
 
   @staticmethod

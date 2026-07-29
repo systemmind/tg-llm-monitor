@@ -41,17 +41,30 @@ def setSettings(value, *args):
   _setHelper(settings, value, *args)
 
 
+def updateSettingsEnvHelper(env_var, *args):
+  value = os.environ.get(env_var) or None
+  if value:
+    setSettings(value, *args)
+
+
+def updateSettingsEnv():
+  updateSettingsEnvHelper(at_TELEGRAM_API_ID,   at_telegram, at_id)
+  updateSettingsEnvHelper(at_TELEGRAM_API_HASH, at_telegram, at_hash)
+  updateSettingsEnvHelper(at_REDIS_URL,         at_redis_url)
+
+
+def updateSettings(file):
+  with open(file, 'r') as f:
+    settings.update(json.loads(f.read()))
+    updateSettingsEnv()
+
+
 def getConfig(*args):
   return _helper(config, *args) if len(args) else config
 
 
 def setConfig(value, *args):
   _setHelper(config, value, *args)
-
-
-def updateSettings(file):
-  with open(file, 'r') as f:
-    settings.update(json.loads(f.read()))
 
 
 def updateConfig(path=None):

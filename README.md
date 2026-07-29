@@ -7,8 +7,12 @@ A service that monitors Telegram channels/chats, filters messages by keywords, a
 - **watcher** — connects to Telegram, filters messages by keywords, and pushes them to Redis Stream
 - **worker** — reads messages from Redis Stream, classifies them using LLM, and saves results to PostgreSQL
 
-## Running Ollama on host
+## Running Ollama on the local host
+This step is not required my it may be usefull for debugging.
+
+Execute the next command in the shell:
 ```bash
+# check that nvidia works well
 nvidia-smi
 
 # setup
@@ -35,23 +39,35 @@ If it does not return 200:
 
 
 ## Running the full service
+Build docker images first:
+```bash
+cd /project/home/folder/tg-llm-monitor
+docker compose build
+```
+
+Luanch the next command to perform telegram authorization:
 ```bash
 # first telegram login
 docker compose run --rm watcher
-
-# enter phone number/code/2FA here
+# enter phone number/code/2FA here and exit from the container
 docker compose down
+```
 
-# basic services
+To launch the watcher service modify the `watcher.config.yml` file (or use it or the `watcher/watcher/settings/config.yml` file as examples) and laucnh the docker:
+```bash
+# modify the watcher.config.yml
 docker compose up -d redis postgres watcher
+```
 
+Launch worker with either local ollama:
+```bash
+docker compose --profile llm up -d worker-ollama
 # check ollama on host
 curl http://127.0.0.1:11434/api/tags
+```
 
-# launch worker with local ollama
-docker compose --profile llm up -d worker-ollama
-
-# or launch worker with cloud LLM
+or cloud LLM:
+```bash
 docker compose --profile cloud up -d worker-cloud
 ```
 
@@ -60,7 +76,7 @@ Stop:
 docker compose --profile llm stop worker-ollama
 ```
 
-If you made changes and need to rebuild and restart without stopping:
+If you made changes and need to rebuild and restart without stopping then execute the next commands.
 
 For worker:
 ```bash
@@ -77,6 +93,10 @@ sudo docker compose up -d --force-recreate watcher
 ## Check database
 ```bash
 docker exec -it tg-llm-monitor-postgres-1 psql -U tg -d tgmon
+\dt
+# see the command output...
+select message_id, text from tg_message_classifications;
+# see the command output...
 ```
 
 ## Troubleshooting

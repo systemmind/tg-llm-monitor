@@ -21,7 +21,7 @@ settings = {
     at_url: os.environ.get(at_OLLAMA_HOST) or 'http://ollama:11434',
     at_model: os.environ.get(at_LLM_MODEL) or 'llama3.2',
     at_prompt: '/etc/tg-monitor/prompt.txt',
-    at_local: True,
+    at_local: False,
   },
 }
 
@@ -47,6 +47,20 @@ def setConfig(value, *args):
   setConfigHelper(settings, value, *args)
 
 
+def updateSettingsEnvHelper(env_var, *args):
+  value = os.environ.get(env_var) or None
+  if value:
+    setConfig(value, *args)
+
+
+def updateSettingsEnv():
+  updateSettingsEnvHelper(at_REDIS_URL,   at_redis, at_url)
+  updateSettingsEnvHelper(at_PG_DSN,      at_pg_dsn)
+  updateSettingsEnvHelper(at_OLLAMA_HOST, at_llm, at_url)
+  updateSettingsEnvHelper(at_LLM_MODEL,   at_llm, at_model)
+
+
 def updateConfig(file):
   with open(file, 'r') as f:
     settings.update(json.loads(f.read()))
+    updateSettingsEnv()

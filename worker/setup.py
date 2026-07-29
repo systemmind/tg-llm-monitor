@@ -8,7 +8,7 @@ setup(
   author_email='systemmind@ukr.net',
   url='https://github.com/systemmind/tg-llm-monitor',
   install_requires=[
-    'argcomplete==3.6.2'
+    'argcomplete==3.6.2',
     'redis==5.0.8',
     'asyncpg==0.29.0',
     'ollama==0.6.2',

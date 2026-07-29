@@ -5,7 +5,7 @@ workdir /app
 copy . .
 
 run pip install -e . \
-  && mkdir -p /var/log/watcher
+  && mkdir -p /var/log/watcher \
   && mkdir -p /etc/tg-monitor
 
 entrypoint ["run", "--settings", "watcher/settings/settings.json"]

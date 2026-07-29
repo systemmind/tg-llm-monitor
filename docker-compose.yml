@@ -9,6 +9,10 @@ services:
   postgres:
     image: postgres:16-alpine
     ports: ["5432:5432"]
+    environment:
+      POSTGRES_USER: tg
+      POSTGRES_PASSWORD: tgpass
+      POSTGRES_DB: tgmon
     volumes:
       - ./postgres:/var/lib/postgresql/data
 
@@ -16,9 +20,13 @@ services:
     build: ./watcher
     depends_on: [redis]
     env_file: .env
+    command:
+      - --config
+      - /etc/tg-monitor/config.yml
+      - --verbose
     volumes:
       - watcher_session:/data/session
-      - ./watcher/watcher/settings/config.yml:/etc/tg-monitor/config.yml:ro
+      - ./watcher.config.yml:/etc/tg-monitor/config.yml:ro
     restart: unless-stopped
 
   ollama:
@@ -38,13 +46,14 @@ services:
     depends_on: [redis, postgres, ollama]
     env_file: .env
     environment:
+      PG_DSN: postgresql://tg:tgpass@postgres:5432/tgmon
       OLLAMA_HOST: http://ollama:11434
       LLM_MODEL: llama3.2
     command:
+      - --local
       - --verbose
-      - --ollama
     volumes:
-      - ./worker/prompt.txt:/config/prompt.txt:ro
+      - ./worker/prompt.txt:/etc/tg-monitor/prompt.txt:ro
     restart: unless-stopped
 
   # This service uses cloud LLM API (OpenAI-compatible)
@@ -54,6 +63,7 @@ services:
     depends_on: [redis, postgres]
     env_file: .env
     environment:
+      PG_DSN: postgresql://tg:tgpass@postgres:5432/tgmon
       LLM_MODEL: qwen.qwen3-coder-30b-a3b-instruct
     command:
       - --verbose

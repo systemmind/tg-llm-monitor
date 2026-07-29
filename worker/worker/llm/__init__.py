@@ -10,7 +10,7 @@ from worker.logger import logger
 from worker.strings import *
 
 
-class JobPosting(BaseModel):
+class MessageMatch(BaseModel):
   match: bool = Field(description="Whether the message matches the job seeker category")
   score: float = Field(description="Confidence score between 0 and 1")
   reason: str = Field(description="Short reason in Russian")

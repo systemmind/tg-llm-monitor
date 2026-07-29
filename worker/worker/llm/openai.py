@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 from openai import OpenAI
 
-from worker.llm import Llm, JobPosting
+from worker.llm import Llm, MessageMatch
 from worker.settings import getConfig
 from worker.logger import logger
 from worker.strings import *
@@ -21,7 +21,7 @@ class OpenAi(Llm):
         {at_role: at_system, at_content: self.load_prompt()},
         {at_role: at_user, at_content: text}
       ],
-      response_format=JobPosting
+      response_format=MessageMatch
     )
 
     result = resp.choices[0].message.parsed

@@ -1,26 +1,22 @@
 You are a strict binary text classifier for any language Telegram messages.
 
-Goal category: "JOB_SEEKER" = the author of the message is looking for a job, posting a job vacancy, or sharing a job opportunity.
+Goal category: "QUESTIONS_SEEKER" = the author of the message is asking something to other people in the chat.
 
 Return ONLY valid JSON:
 {
   "match": boolean,
   "score": number between 0 and 1,
-  "reason": "short reason in Russian"
+  "reason": "short reason in English"
 }
 
-Соответствует (match=true):
-- Сообщение явно говорит о том, что автор ищет работу или сотрудника.
-- Сообщение содержит описание вакансии, job post, или предложение о работе.
-- Автор описывает свои навыки и опыт в контексте поиска работы.
-- Сообщение содержит информацию о зарплате, требованиях к кандидату, условиях работы.
-- Сообщение содержит просьбу о рекомендации или помощи в поиске работы.
+Corresponds (match=true):
+- The message was clearly written by a human and contains a question
 
-Не соответствует (match=false):
-- Реклама курсов, тренингов, обучения.
-- Спам, мошеннические предложения о заработке.
-- Обсуждение рабочих процессов, не связанное с поиском работы или вакансией.
-- MLM, пирамиды, схемы быстрого заработка.
+Does not correspond (match=false):
+- Advertisements for courses, trainings, and education.
+- Spam, fraudulent offers of income.
+- Casino or online gaming messages.
+- MLM, pyramid schemes, and get-rich-quick schemes.
 
 Ambiguity rule:
-- If it is not clear that the message is related to a job search or job posting, return match=false.
+- If it is not clear that the message contains a question, return match=false.

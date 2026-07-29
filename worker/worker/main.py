@@ -9,7 +9,7 @@ from worker.strings import *
 
 async def main():
   parser = argparse.ArgumentParser()
-  parser.add_argument("-o", "--ollama", help="Use ollama local model", action="store_true", default=False)
+  parser.add_argument("-o", "--local", help="Use local model", action="store_true", default=False)
   parser.add_argument("-s", "--settings", help="Path to settings file")
   parser.add_argument("-v", "--verbose", help="Verbose output", action="store_true", default=False)
 
@@ -23,7 +23,7 @@ async def main():
   else:
     logger.setLevel(logging.INFO)
 
-  if args.ollama:
+  if args.local:
     setConfig(True, at_llm, at_local)
 
   app = Application()

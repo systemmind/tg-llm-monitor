@@ -62,7 +62,7 @@ class Application:
       logger.warning("LLM returned unexpected result format")
       return {at_score: 0.0, at__saved: False}
 
-    if llm_result.get(at_score) and llm_result[at_score] > 0.0:
+    if llm_result.get(at_score) and llm_result[at_score] > 0.5:
       saved = True
       await self.db.insert_result(payload=payload, stream_id=stream_id, llm=llm_result)
 
@@ -70,8 +70,7 @@ class Application:
     return llm_result
 
   async def _run(self):
-    pg_dsn = getConfig(at_pg_dsn)
-    self.db = await Database.create(pg_dsn)
+    self.db = await Database.create()
 
     await self.llm.init()
 

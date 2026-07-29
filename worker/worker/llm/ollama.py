@@ -4,7 +4,7 @@ from typing import Any, Dict
 
 from ollama import chat
 
-from worker.llm import Llm, JobPosting
+from worker.llm import Llm, MessageMatch
 from worker.settings import getConfig
 from worker.logger import logger
 from worker.strings import *
@@ -28,11 +28,11 @@ class Ollama(Llm):
           at_content: text
         }
       ],
-      format=JobPosting.model_json_schema(),
+      format=MessageMatch.model_json_schema(),
       options={'temperature': 0},
     )
 
-    result = JobPosting.model_validate_json(response.message.content)
+    result = MessageMatch.model_validate_json(response.message.content)
     return result.model_dump()
 
 
