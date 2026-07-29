@@ -8,9 +8,11 @@ setup(
   author_email='systemmind@ukr.net',
   url='https://github.com/systemmind/tg-llm-monitor',
   install_requires=[
+    'argcomplete==3.6.2'
     'redis==5.0.8',
     'asyncpg==0.29.0',
-    'httpx==0.27.2',
+    'ollama==0.6.2',
+    'openai==2.43.0'
   ],
   packages=find_packages(),
   package_data={'worker': ['cfg/logging.conf', 'db/schema.sql', 'settings/settings.json']},

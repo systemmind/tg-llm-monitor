@@ -14,7 +14,7 @@
   "llm": {
     "url": "http://ollama:11434",
     "model": "llama3.2",
-    "prompt": "/config/prompt.txt",
+    "prompt": "/etc/tg-monitor/prompt.txt",
     "local": true
   }
 }

@@ -2,43 +2,39 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-import httpx
+from ollama import chat
 
-from worker.llm import Llm
+from worker.llm import Llm, JobPosting
 from worker.settings import getConfig
 from worker.logger import logger
 from worker.strings import *
 
 
 class Ollama(Llm):
-  async def classify(self, client: httpx.AsyncClient, text: str) -> Dict[str, Any]:
+  async def classify(self, text: str) -> Dict[str, Any]:
     model = getConfig(at_llm, at_model)
     url = getConfig(at_llm, at_url)
     logger.debug(f"perform ollama request, model: {model}")
 
-    prompt = self.build_prompt(text)
-
-    resp = await client.post(
-      f"{url}/api/generate",
-      json={
-        at_model: model,
-        at_prompt: prompt,
-        at_stream: False,
-        at_options: {
-          at_temperature: 0,
+    response = chat(
+      model=model,
+      messages=[
+        {
+          at_role: at_system,
+          at_content: self.load_prompt()
         },
-      },
-      timeout=60.0,
+        {
+          at_role: at_user,
+          at_content: text
+        }
+      ],
+      format=JobPosting.model_json_schema(),
+      options={'temperature': 0},
     )
 
-    resp.raise_for_status()
-    data = resp.json()
+    result = JobPosting.model_validate_json(response.message.content)
+    return result.model_dump()
 
-    out = self.extract_json(data.get("response", ""))
-    out["_ollama"] = {
-      at_model: model,
-      at_prompt_tokens: data.get(at_prompt_eval_count),
-      at_eval_tokens: data.get(at_eval_count),
-      at_total_duration: data.get(at_total_duration),
-    }
-    return out
+
+  async def close(self):
+    pass

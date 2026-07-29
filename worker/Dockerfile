@@ -6,5 +6,6 @@ copy . .
 
 run pip install -e . \
   && mkdir -p /var/log/worker
+  && mkdir -p /etc/tg-monitor
 
 entrypoint ["run", "--settings", "worker/settings/settings.json"]

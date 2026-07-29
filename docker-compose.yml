@@ -18,7 +18,7 @@ services:
     env_file: .env
     volumes:
       - watcher_session:/data/session
-      - ./watcher/watcher/settings/config.yml:/config/config.yml:ro
+      - ./watcher/watcher/settings/config.yml:/etc/tg-monitor/config.yml:ro
     restart: unless-stopped
 
   ollama:
@@ -28,7 +28,7 @@ services:
     ports: ["11434:11434"]
     volumes:
       - ./ollama:/root/.ollama
-    # gpus: all   # uncomment this line to launch LLM on GPU
+    gpus: all                       # launch LLM on GPU
     restart: unless-stopped
 
   # This service uses local ollama model
@@ -54,11 +54,11 @@ services:
     depends_on: [redis, postgres]
     env_file: .env
     environment:
-      LLM_MODEL: gpt-4o-mini
+      LLM_MODEL: qwen.qwen3-coder-30b-a3b-instruct
     command:
       - --verbose
     volumes:
-      - ./worker/prompt.txt:/config/prompt.txt:ro
+      - ./worker/prompt.txt:/etc/tg-monitor/prompt.txt:ro
     restart: unless-stopped
 
 volumes:
