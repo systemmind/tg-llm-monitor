@@ -61,7 +61,7 @@ docker compose up -d redis postgres watcher
 
 Launch worker with either a local ollama:
 ```bash
-docker compose --profile llm up -d worker-ollama
+docker compose --profile llm up -d worker-local
 # check ollama on host
 curl http://127.0.0.1:11434/api/tags
 ```
@@ -71,17 +71,24 @@ or a cloud LLM:
 docker compose --profile cloud up -d worker-cloud
 ```
 
+But it is possible to launch worker without any LLM. Such worker will just save all messages to the database.
+```bash
+docker compose --profile trivial up -d worker-trivial
+```
+
 Stop:
 ```bash
-docker compose --profile llm stop worker-ollama
+docker compose --profile llm stop worker-local
+docker compose --profile cloud stop worker-cloud
+docker compose --profile trivial stop worker-trivial
 ```
 
 If you made changes and need to rebuild and restart without service stopping then execute the next commands.
 
 For worker:
 ```bash
-sudo docker compose --profile llm build worker-ollama
-sudo docker compose --profile llm up -d --force-recreate worker-ollama
+sudo docker compose --profile llm build worker-local
+sudo docker compose --profile llm up -d --force-recreate worker-local
 ```
 
 For watcher:

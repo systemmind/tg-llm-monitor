@@ -15,6 +15,7 @@
     "url": "http://ollama:11434",
     "model": "llama3.2",
     "prompt": "/etc/tg-monitor/prompt.txt",
-    "local": false
+    "local": false,
+    "cloud": false
   }
 }

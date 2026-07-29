@@ -12,9 +12,8 @@ from worker.logger import logger
 from worker.strings import *
 
 
-class Application:
+class IApplication:
   def __init__(self):
-    self.llm = Ollama() if getConfig(at_llm, at_local) else OpenAi()
     self.tasks = set()
     self.exitCode = 0
     self._stop = asyncio.Event()
@@ -42,6 +41,13 @@ class Application:
     finally:
       logger.info("application exit")
 
+  async def handleMessage(self, payload: dict, stream_id: str = '') -> dict:
+    raise NotImplementedError
+
+  async def _run(self):
+    self.db = await Database.create()
+    self.broker = MessageBroker(self)
+
   async def cleanup(self):
     self._stop.set()
     await cancel_tasks(self.tasks)
@@ -52,6 +58,31 @@ class Application:
     if self.db:
       await self.db.close()
 
+    await self.llm.close()
+
+
+class Application(IApplication):
+  def __init__(self):
+    self.llm = Ollama() if getConfig(at_llm, at_local) else OpenAi()
+    super().__init__()
+
+  async def __call__(self):
+    try:
+      logger.info("application started")
+      try:
+        await self.createTask(self._run())
+      except asyncio.CancelledError:
+        logger.debug("application loop task cancelled")
+
+      return self.exitCode
+    except Exception as error:
+      logger.exception(error)
+      return 1
+    finally:
+      logger.info("application exit")
+
+  async def cleanup(self):
+    await super().cleanup()
     await self.llm.close()
 
   async def handleMessage(self, payload: dict, stream_id: str = '') -> dict:
@@ -70,9 +101,24 @@ class Application:
     return llm_result
 
   async def _run(self):
-    self.db = await Database.create()
-
+    await super()._run()
     await self.llm.init()
+    await self.broker.run(self._stop)
 
-    self.broker = MessageBroker(self)
+
+# The trivial application does not call llm and saves all messages to the database
+class TrivialApplication(IApplication):
+  async def handleMessage(self, payload: dict, stream_id: str = '') -> dict:
+    llm_result = {
+      at_score: 1.0,
+      at_reason: 'trivial application does not call llm and it just saves all messages to database',
+      at__saved: True,
+      at_match: True
+    }
+
+    await self.db.insert_result(payload=payload, stream_id=stream_id, llm=llm_result)
+    return llm_result
+
+  async def _run(self):
+    await super()._run()
     await self.broker.run(self._stop)

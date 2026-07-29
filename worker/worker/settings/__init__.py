@@ -22,6 +22,7 @@ settings = {
     at_model: os.environ.get(at_LLM_MODEL) or 'llama3.2',
     at_prompt: '/etc/tg-monitor/prompt.txt',
     at_local: False,
+    at_cloud: False
   },
 }
 

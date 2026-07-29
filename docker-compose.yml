@@ -40,7 +40,7 @@ services:
     restart: unless-stopped
 
   # This service uses local ollama model
-  worker-ollama:
+  worker-local:
     profiles: ["llm"]
     build: ./worker
     depends_on: [redis, postgres, ollama]
@@ -50,7 +50,7 @@ services:
       OLLAMA_HOST: http://ollama:11434
       LLM_MODEL: llama3.2
     command:
-      - --local
+      - --llm-local
       - --verbose
     volumes:
       - ./worker/prompt.txt:/etc/tg-monitor/prompt.txt:ro
@@ -65,6 +65,21 @@ services:
     environment:
       PG_DSN: postgresql://tg:tgpass@postgres:5432/tgmon
       LLM_MODEL: qwen.qwen3-coder-30b-a3b-instruct
+    command:
+      - --llm-cloud
+      - --verbose
+    volumes:
+      - ./worker/prompt.txt:/etc/tg-monitor/prompt.txt:ro
+    restart: unless-stopped
+
+  # This service does NOT uses ay LLM
+  worker-trivial:
+    profiles: ["trivial"]
+    build: ./worker
+    depends_on: [redis, postgres]
+    env_file: .env
+    environment:
+      PG_DSN: postgresql://tg:tgpass@postgres:5432/tgmon
     command:
       - --verbose
     volumes:
